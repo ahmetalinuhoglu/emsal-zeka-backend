@@ -94,11 +94,23 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {
-        "status": "healthy", 
-        "message": "Backend is running",
-        **config.get_config_info()
-    }
+    """
+    Simple health check endpoint for Railway deployment
+    """
+    try:
+        # Simple health check that doesn't depend on external services
+        return {
+            "status": "healthy", 
+            "message": "Backend is running",
+            "timestamp": "2024-07-21",
+            "version": "1.0.0"
+        }
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        return {
+            "status": "unhealthy",
+            "message": f"Health check failed: {str(e)}"
+        }
 
 @app.get("/debug")
 async def debug_info():
@@ -255,4 +267,5 @@ async def search_decisions(request: SearchRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True) 
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False) 
